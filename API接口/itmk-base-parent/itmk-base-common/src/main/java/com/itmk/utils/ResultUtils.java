@@ -4,8 +4,9 @@ public class ResultUtils {
     /**
      * 无参数返回
      * @return
+     * @param s
      */
-    public static ResultVo succcess() {
+    public static ResultVo succcess(String s) {
         return Vo(null, StatusCode.SUCCESS_CODE, null);
     }
     public static ResultVo success(String msg){
