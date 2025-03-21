@@ -5,10 +5,10 @@ import { resolve } from 'path'
 export default defineConfig({
   plugins: [vue()],
   server: {
-    host: '0.0.0.0',//�������̨
-    port: 8080,//���ö˿ں�
-    hmr: true,//�����ȸ���
-    open: true //�������������
+    host: '0.0.0.0',
+    port: 8080,
+    hmr: true,
+    open: true 
   },
   resolve: {
     alias: [

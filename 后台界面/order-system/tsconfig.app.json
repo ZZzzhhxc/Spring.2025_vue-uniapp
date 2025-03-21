@@ -9,9 +9,9 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "baseUrl": ".",//path路径解析起点
+    "baseUrl": ".",
     "paths": {
-      "@/*": [ //别名路径设置
+      "@/*": [ 
         "src/*"
       ]
     }
