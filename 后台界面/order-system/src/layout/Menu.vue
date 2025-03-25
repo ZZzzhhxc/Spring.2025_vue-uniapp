@@ -3,7 +3,7 @@
     <el-menu
      :collapse="collapse"
      router 
-     background-color="#51515b"  
+     background-color="#EEEEEE"  
      :default-active="activeIndex" 
      class="el-menu-vertical-demo"
 >   
@@ -61,23 +61,46 @@ const collapse = computed(()=>{
 </script>
 
 <style scoped lang="scss">
+  :deep(.el-menu-item) {
+        transition: none !important; /* 禁用所有过渡动画 */
+        will-change: background-color; /* 启用硬件加速 */
+    }
 .el-menu-vertical-demo:not(.el-menu--collapse) {
     width: 230px;
     min-height: 400px;
+    background-color: #f5f7fa; /* 新：更柔和的背景色 */
 }
+
 .el-menu {
     border-right: none;
-}
-.el-menu .el-menu-item {
-    color: #bfcbd9;
-    font-size: 15px;
-    font-weight: bold;
-}
-.el-menu-item.is-active {
-    color: #409eff !important;
-}
-//鼠标移动背景颜色
-:deep(.el-menu-item:hover) {
-   // background-color: #1f2121 !important;
+    background-color: transparent !important; /* 透明背景 */
+    
+    .el-menu-item {
+        color: #4a8c2e !important; /* 新：深绿色文字 */
+        font-size: 15px;
+        font-weight: 600; /* 稍细的字体 */
+        height: 48px;
+        line-height: 48px;
+        margin: 4px 8px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        
+        .el-icon {
+            color: inherit;
+            font-size: 18px;
+            margin-right: 8px;
+        }
+        
+        &:hover {
+            background-color: #e8f5e9 !important;
+            color: #388e3c !important;
+        }
+        
+        &.is-active {
+            background-color: #4caf50 !important;
+            color: white !important;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+    }
 }
 </style>

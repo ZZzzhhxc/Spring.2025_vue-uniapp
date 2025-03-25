@@ -54,37 +54,73 @@ const onConfirm=()=>{
 </script>
 
 <style lang="scss">
-    .container {
-      overflow-x: initial;
-      overflow-y: auto;
+
+.container {
+  overflow: hidden;
+}
+
+
+.el-dialog {
+
+  width: 630px !important;
+  min-width: 630px !important;
+  max-width: 630px !important;
+  
+
+  border-top-left-radius: 7px !important;
+  border-top-right-radius: 7px !important;
+  padding: 0;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12) !important;
+
+
+  .el-dialog__header {
+    margin-right: 0;
+    padding: 12px 16px;
+    border-radius: 7px 7px 0 0 !important;
+    background: linear-gradient(135deg, #82bc84 0%, #43A047 50%, #82bc84 0%) !important;
+    
+    .el-dialog__title {
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
     }
-    .el-dialog {
-      border-top-left-radius: 7px !important;
-      border-top-right-radius: 7px !important;
+  }
+
+
+  .el-dialog__body {
+    padding: 16px;
+    background: #fff;
+  
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: calc(100vh - 200px) !important; /* 动态适应 */
+  
+    > div {
+      width: calc(100% - 1px) !important; /* 强制宽度限制 */
+      min-width: 0 !important;
+    }
+  }
+
+  .el-dialog__footer {
+    border-top: 1px solid #e8eaec !important;
+    padding: 12px 16px;
+    background: #ffffff;
+    
+    .el-button {
+      min-width: 64px;
+      padding: 6px 12px;
+      border-radius: 3px;
       
-      padding: 0;
-      .el-dialog__header {
-        margin-right: 0px;
-        border-top-left-radius: 7px !important;
-        border-top-right-radius: 7px !important;
-        background-color: #494f4f !important;
-        .el-dialog__title {
-          color: #fff;
-          font-size: 16px;
-          font-weight: 600;
-        }
-      }
-      .el-dialog__headerbtn {
-        .el-dialog__close {
-          color: #fff;
-        }
-      }
-      .el-dialog__body {
-        padding: 10px;
-      }
-      .el-dialog__footer {
-        border-top: 1px solid #e8eaec !important;
-        padding: 10px;
+      + .el-button {
+        margin-left: 10px;
       }
     }
-    </style>
+  }
+}
+
+
+body .el-dialog__wrapper {
+  overflow: hidden !important;
+}
+</style>
