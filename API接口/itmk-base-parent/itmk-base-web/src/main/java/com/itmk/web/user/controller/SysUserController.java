@@ -20,6 +20,13 @@ public class SysUserController {
 
     @PostMapping
     public ResultVo add(@RequestBody SysUser user){
+        //判断账户是否重复
+        QueryWrapper<SysUser> query =new QueryWrapper<>();
+        query.lambda().eq(SysUser::getUsername,user.getUsername()).eq(SysUser::getPassword,user.getPassword());
+        SysUser one = sysUserService.getOne(query);
+        if(one!=null){
+            return  ResultUtils.error("用户账户和密码重复");
+        }
         if(sysUserService.save(user)){
             return ResultUtils.success("新增成功！");
         }
