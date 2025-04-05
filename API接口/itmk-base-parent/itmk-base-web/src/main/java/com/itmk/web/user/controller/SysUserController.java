@@ -35,7 +35,7 @@ public class SysUserController {
 
     @PutMapping
     public ResultVo edit(@RequestBody SysUser user){
-        if(sysUserService.save(user)){
+        if(sysUserService.updateById(user)){
             return ResultUtils.success("编辑成功！");
         }
         return ResultUtils.error("编辑失败！");
