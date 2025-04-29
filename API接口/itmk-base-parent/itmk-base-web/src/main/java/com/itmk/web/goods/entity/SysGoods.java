@@ -1,9 +1,14 @@
 package com.itmk.web.goods.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.itmk.web.goods_specs.entity.SysGoodsSpecs;
 import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @TableName("sys_goods")
@@ -17,4 +22,6 @@ public class SysGoods {
     private String status;
     private String goodsUnit;
     private String orderNum;
+    @TableField(exist = false)
+    List<SysGoodsSpecs> specs = new ArrayList<>();
 }

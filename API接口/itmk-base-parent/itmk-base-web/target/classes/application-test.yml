@@ -1,7 +1,8 @@
-#端口号配置
+# 端口号配置
 server:
   port: 8089
-#数据库连接配置
+
+# 数据库连接配置
 spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
@@ -10,19 +11,28 @@ spring:
     username: root
     password: LYP1314521
 
-#mybatis plus配置
+# 微信小程序相关
+Wechat:
+  Applets:
+    # 小程序appID
+    appId: wxc2f9f05e369786ff
+    # 小程序秘钥
+    appSecret: ddaef6972a0e91f1ffa9a90a3c6fb6e6
+
+
+#图片上传
+web:
+  uploadpath: D:/BISHE/images/  #图片上传的路径
+  loadpath: file:D:/BISHE/images/ #图片访问、加载的路径
+
+# Mybatis Plus 配置
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:
-      #配置mybatis plus 在更新时只更新非空和非NULL的字段
+      # 配置 Mybatis Plus 在更新时只更新非空和非NULL的字段
       update-strategy: not_empty
-
-#图片上传
-web:
-  uploadpath: D:/BISHE/images/  #图片上传的路径
-  load-path: file:D://BISHE/images/ #图片访问、加载的路径
 
 logging:
   pattern:
