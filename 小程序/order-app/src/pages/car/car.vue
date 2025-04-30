@@ -35,7 +35,7 @@
 				总计：<text style="color: #f00;font-weight: bold;">￥ {{totalPrice}}</text>
 			</view>
 		</view>
-		<view class="end-right">
+		<view class="end-right" @click="confirm">
 			结算({{totalNum}})
 		</view>
 	</view>
@@ -48,7 +48,9 @@
 		computed
 	} from 'vue'
 	import {carStore} from '../../store/car'
+	import { orderStore } from '../../store/order';
 	const store = carStore()
+	const ostore = orderStore()
 	const show = ref(true);
 	const allchecked = ref(true);
 	const checked = ref(true);
@@ -61,57 +63,6 @@
 		}
 	    return store.carList
 	})
-	// const goods = reactive([{
-	// 		flag: true,
-	// 		goodsName: "女款-M",
-	// 		goodsUnit: '/份',
-	// 		goodsId: 1,
-	// 		num: 1,
-	// 		specsName: '中',
-	// 		price: 149,
-	// 		goodsImage: "http://192.168.198.1:8089/images/be1a57c0-f5a7-4484-8469-740983246de8.png",
-	// 	},
-	// 	{
-	// 		flag: true,
-	// 		goodsName: "女款-M",
-	// 		goodsUnit: '/份',
-	// 		goodsId: 1,
-	// 		specsName: '中',
-	// 		num: 1,
-	// 		price: 149,
-	// 		goodsImage: "http://192.168.198.1:8089/images/a35e4257-9e9a-43f8-b077-a7664064ce12.png",
-	// 	},
-	// 	{
-	// 		flag: true,
-	// 		goodsName: "女款-M",
-	// 		goodsUnit: '/份',
-	// 		goodsId: 1,
-	// 		num: 1,
-	// 		specsName: '中',
-	// 		price: 149,
-	// 		goodsImage: "http://192.168.198.1:8089/images/a35e4257-9e9a-43f8-b077-a7664064ce12.png",
-	// 	},
-	// 	{
-	// 		flag: true,
-	// 		goodsName: "女款-M",
-	// 		goodsId: 1,
-	// 		num: 1,
-	// 		goodsUnit: '/份',
-	// 		specsName: '中',
-	// 		price: 149,
-	// 		goodsImage: "http://192.168.198.1:8089/images/a35e4257-9e9a-43f8-b077-a7664064ce12.png",
-	// 	},
-	// 	{
-	// 		flag: true,
-	// 		goodsName: "女款-M",
-	// 		goodsId: 1,
-	// 		num: 1,
-	// 		goodsUnit: '/份',
-	// 		specsName: '中',
-	// 		price: 149,
-	// 		goodsImage: "http://192.168.198.1:8089/images/a35e4257-9e9a-43f8-b077-a7664064ce12.png",
-	// 	}
-	// ])
 	const selected = (e, item) => {
 		console.log(e)
 		console.log(item)
@@ -186,6 +137,24 @@
 		})
 		return totalPrice
 	})
+	//跳转确认订单
+		const confirm = (item) => {
+			//清空
+			ostore.orderList = []
+			//如果没有数据，提示信息
+			if(store.carList.length == 0){
+				uni.showToast({
+					icon:'none',
+					title:'请选择菜品'
+				})
+				return;
+			}
+			//设置确定订单数据
+			ostore.addOrderList(store.carList)
+			uni.navigateTo({
+				url: '../confirm/confirm'
+			});
+		}
 </script>
 
 <style lang="scss">

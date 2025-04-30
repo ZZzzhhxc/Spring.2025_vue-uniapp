@@ -3,17 +3,17 @@
 		<view>
 			<view class="info">
 				<view class="name">
-					张明
+					{{astore.userName}}
 				</view>
 				<view class="phone">
-					18687116xxx
+					{{astore.phone}}
 				</view>
 			</view>
-			<view class="">
-				北京工业大学
+			<view>
+				{{astore.area}}{{astore.address}}
 			</view>
 		</view>
-		<u-icon color="#c8c9cc" name="arrow-right"></u-icon>
+		<u-icon name="arrow-right" color="#c8c9cc"></u-icon>
 	</view>
 	<view style="padding-bottom: 60px;margin-top: 10px;" v-if="goods.length > 0">
 		<view class="goods-detail" v-for="(item,index) in goods" :key="index">
@@ -27,6 +27,9 @@
 					<text class="goods-price">￥{{item.price}}{{item.goodsUnit}}</text>
 				</view>
 			</view>
+			<view class="detail-right">
+				<text class="num">x{{item.num}}</text>
+			</view>
 		</view>
 	</view>
 	<view class="end">
@@ -35,7 +38,7 @@
 				总计：<text style="color: #2E8B57;font-weight: bold;">￥{{totalPrice}}</text>
 			</view>
 		</view>
-		<view @click="toConfirm" class="end-right">
+		<view @click="commitBtn" class="end-right">
 			提交订单({{totalNum}})
 		</view>
 	</view>
@@ -47,75 +50,85 @@
 		reactive,
 		computed
 	} from 'vue'
-	const goods = reactive([{
-			flag: true,
-			goodsName: "女款-M",
-			goodsUnit: '/份',
-			goodsId: 1,
-			num: 1,
-			specsName: '中',
-			price: 149,
-			goodsImage: "http://192.168.31.70:8089/images/a35e4257-9e9a-43f8-b077-a7664064ce12.png",
-		},
-		{
-			flag: true,
-			goodsName: "女款-M",
-			goodsUnit: '/份',
-			goodsId: 1,
-			specsName: '中',
-			num: 1,
-			price: 149,
-			goodsImage: "http://192.168.31.70:8089/images/a35e4257-9e9a-43f8-b077-a7664064ce12.png",
-		},
-		{
-			flag: true,
-			goodsName: "女款-M",
-			goodsUnit: '/份',
-			goodsId: 1,
-			num: 1,
-			specsName: '中',
-			price: 149,
-			goodsImage: "http://192.168.31.70:8089/images/a35e4257-9e9a-43f8-b077-a7664064ce12.png",
-		},
-		{
-			flag: true,
-			goodsName: "女款-M",
-			goodsId: 1,
-			num: 1,
-			goodsUnit: '/份',
-			specsName: '中',
-			price: 149,
-			goodsImage: "http://192.168.31.70:8089/images/a35e4257-9e9a-43f8-b077-a7664064ce12.png",
-		}
-	])
+	import {
+		orderStore
+	} from '../../store/order.js'
+	import {
+		addressStore
+	} from '../../store/address.js'
+	import {
+		getAddressApi
+	} from '../../api/user.js'
+	import {
+		splaceOrderApi
+	} from '../../api/order.js'
+	import {
+		onLoad
+	} from '@dcloudio/uni-app';
+	//获取store
+	const store = orderStore()
+	const astore = addressStore()
+	const goods = computed(() => {
+		return store.orderList
+	})
+
 	//总数
-	const totalNum = computed(()=>{
+	const totalNum = computed(() => {
 		let totalNum = 0;
-			
-		if(goods.length >0){
-			goods.map(item =>{
-				item.flag ? totalNum += item.num : totalNum += 0;
-			})
-		}
-		
+		store.orderList.map(item => {
+			item.flag ? totalNum += item.num : totalNum += 0;
+		})
 		return totalNum
 	})
 	//总共价格
-	const totalPrice = computed(()=>{
+	const totalPrice = computed(() => {
 		let totalPrice = 0;
-		if(goods.length > 0){
-			goods.map(item =>{
-				item.flag ? totalPrice += item.num*item.price : totalPrice += 0;
-			})
-		}
+		store.orderList.map(item => {
+			item.flag ? totalPrice += item.num * item.price : totalPrice += 0;
+		})
 		return totalPrice
 	})
 	//跳转新增地址
 	const toAddress = (item) => {
 		uni.navigateTo({
-			url: '../address/address'
+			url: '../addresslist/addresslist'
 		});
 	}
+	//查询默认地址
+	const getAddress = async () => {
+		let res = await getAddressApi({
+			openid: uni.getStorageSync('openid')
+		})
+		console.log(res)
+		if (res && res.code == 200) {
+			astore.checkedId = res.data.addressId
+			astore.userName = res.data.userName
+			astore.phone = res.data.phone
+			astore.area = res.data.area
+			astore.address = res.data.address
+		}
+	}
+	//提交订单
+	const commitBtn = async () => {
+		let commitParm = reactive({
+			openid: uni.getStorageSync('openid'),
+			userName: astore.userName,
+			phone: astore.phone,
+			address: astore.area + "," + astore.address,
+			price: totalPrice.value,
+			details: store.orderList
+		})
+		const res = await splaceOrderApi(commitParm)
+		console.log(res)
+		if (res && res.code == 200) {
+			//清空购物车
+			store.orderList = []
+			uni.navigateBack()
+		}
+	}
+	onLoad(() => {
+		getAddress()
+	})
 </script>
 
 <style lang="scss">
@@ -127,14 +140,13 @@
 		display: flex;
 		justify-content: space-between;
 		background-color: #FFF;
-		height: '25px';
 		padding: 10px 20px;
 
 		.info {
 			display: flex;
 
 			.name {
-				font-size: 14px;
+				font-size: 15px;
 				font-weight: 600;
 			}
 

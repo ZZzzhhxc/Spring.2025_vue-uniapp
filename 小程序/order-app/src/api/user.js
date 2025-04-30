@@ -34,7 +34,6 @@ export const wxLoginApi = (code) => {
 export const userLogin = async () => {
 	//获取code
 	let res = await getCode()
-	//登录: 调用后端接口
 	const {
 		data
 	} = await wxLoginApi(res)
@@ -45,4 +44,20 @@ export const userLogin = async () => {
 		uni.setStorageSync('openid', data.openid)
 		uni.setStorageSync('sessionkey', data.sessionKey)
 	}
+}
+//新增地址
+export const addAddressApi = (parm)=>{
+	return http.post("/wxapi/address",parm)
+}
+//地址列表
+export const addressListApi = (parm)=>{
+	return http.get("/wxapi/address/list",parm)
+}
+//编辑地址
+export const editAddressApi = (parm)=>{
+	return http.put("/wxapi/address",parm)
+}
+//默认地址查询
+export const getAddressApi = (parm)=>{
+	return http.get("/wxapi/address/getAddress",parm)
 }

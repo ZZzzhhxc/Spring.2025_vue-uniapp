@@ -1,19 +1,6 @@
 {
 	"pages": [
 		{
-			"path": "pages/comfirm/confirm",
-			"style": {
-				"navigationBarTitleText": "确认订单"
-			}
-		},
-		{
-			"path": "pages/address/address",
-			"style": {
-				"navigationBarTitleText": "新增地址"
-				// "enablePullDownRefresh": false
-			}
-		},
-		{
 			"path": "pages/index/index",
 			"style": {
 				"navigationBarTitleText": "首页"
@@ -43,7 +30,35 @@
 			"style": {
 				"navigationBarTitleText": ""
 			}
-		}	
+		},
+		{
+			"path": "pages/confirm/confirm",
+			"style": {
+				"navigationBarTitleText": "确认订单"
+				//"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/address/address",
+			"style": {
+				"navigationBarTitleText": "新增地址"
+				// "enablePullDownRefresh": false
+			}
+		},
+		{
+			"path" : "pages/addresslist/addresslist",
+			"style" : 
+			{
+				"navigationBarTitleText" : ""
+			}
+		},
+		{
+			"path" : "pages/order/order",
+			"style" : 
+			{
+				"navigationBarTitleText" : "我的订单"
+			}
+		}
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "white",

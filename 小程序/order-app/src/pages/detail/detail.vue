@@ -1,8 +1,7 @@
 <template>
-	<view>
-		<u-swiper name='images' border-radius='1' :duration='duration' :interval='interval' :height="height"
-			:list="swipperList"></u-swiper>
-	</view>
+	<u-swiper name='images' border-radius='1' :duration='duration' :interval='interval' :height="height"
+		:list="swipperList">
+	</u-swiper>
 	<view class="info">
 		<view class="title">
 			{{title}}
@@ -76,25 +75,36 @@
 		</view>
 		<view class="right">
 			<view class="cart btn u-line-1" @click="addCar">加入购物车</view>
-			<view class="buy btn u-line-1">立即购买</view>
+			<view @click="addBuy" class="buy btn u-line-1">立即购买</view>
 		</view>
 	</view>
 </template>
 
 <script setup>
 	import {
-		onLoad
-	} from '@dcloudio/uni-app';
-	import {
 		computed,
 		ref
 	} from 'vue';
-	import { carStore } from '../../store/car.js'
-	import {userLogin} from '../../api/user.js'
+	import {
+		onLoad
+	} from '@dcloudio/uni-app';
+	import {
+		carStore
+	} from '../../store/car.js'
+	import {
+		orderStore
+	} from '../../store/order.js'
+	import {
+		userLogin
+	} from '../../api/user.js'
+	//获取store
 	const store = carStore()
-	const carCount = computed(()=>{
+	const ostore = orderStore()
+	//购物车数量
+	const carCount = computed(() => {
 		return store.carList.length
 	})
+	//菜品详情
 	const content = ref('')
 	const current = ref(0)
 	//轮播图高度
@@ -121,17 +131,16 @@
 	const specs = ref([])
 	//规格点击事件
 	const change = (index, item) => {
-	    current.value = index
-	    price.value = item.goodsPrice
-	    carData.value.price = item.goodsPrice
-	    carData.value.specsName = item.specsName
-	    console.log(carData)
+		current.value = index
+		price.value = item.goodsPrice
+		carData.value.price = item.goodsPrice
+		carData.value.specsName = item.specsName
 	}
 	//详情tab
 	const swiperCurrent = ref(0)
 	const dx = ref(0)
 	const tabIndex = ref(0)
-	//购物车数据定义
+	//购物车的数据类型
 	const carData = ref({
 		flag: true,
 		goodsName: "",
@@ -148,8 +157,17 @@
 		swiperCurrent.value = index;
 	}
 	//加入购物车
-	const addCar = ()=>{
-	    store.addCar(carData.value)
+	const addCar = () => {
+		store.addCar(carData.value)
+	}
+	//立即购买
+	const addBuy = () => {
+		//清空
+		ostore.orderList = []
+		ostore.addOrder(carData.value)
+		uni.navigateTo({
+			url: '../confirm/confirm'
+		});
 	}
 	const animationfinish = ({
 		detail: {
@@ -192,7 +210,7 @@
 	})
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 	page {
 		display: flex;
 		flex-direction: column;
@@ -334,7 +352,7 @@
 			}
 
 			.cart {
-				background-color: #ffcc00;
+				background-color: #ed3f14;
 				margin-right: 30rpx;
 			}
 

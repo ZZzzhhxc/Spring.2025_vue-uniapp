@@ -2,23 +2,22 @@
 	<view class="wrap">
 		<view class="top">
 			<view class="item">
-				<view class="left">收货人:</view>
-				<input type="text" placeholder-class="line" placeholder="请填写收货人姓名" />
+				<view class="left">收货人</view>
+				<input type="text" v-model="address.userName" placeholder-class="line" placeholder="请填写收货人姓名" />
 			</view>
 			<view class="item">
-				<view class="left">手机号码:</view>
-				<input type="text" placeholder-class="line" placeholder="请填写收货人手机号" />
+				<view class="left">手机号码</view>
+				<input type="text" v-model="address.phone" placeholder-class="line" placeholder="请填写收货人手机号" />
 			</view>
 			<view class="item" @confirm='confirm' @tap="showRegionPicker">
 				<view class="left">所在地区:</view>
-				<input disabled style="width: 100%;" v-model="finalAddress" type="text" :placeholder-class="line"
+				<input disabled style="width: 100%;" v-model="address.area" type="text" :placeholder-class="line"
 					placeholder="省市区县、乡镇等" />
 			</view>
 			<view class="item address">
-				<view class="left">详细地址:</view>
-				<textarea type="text" placeholder-class="line" placeholder="街道、楼牌等" />
+				<view class="left">详细地址</view>
+				<textarea type="text" v-model="address.address" placeholder-class="line" placeholder="街道、楼牌等" />
 			</view>
-
 		</view>
 		<view class="bottom">
 			<view class="default">
@@ -27,12 +26,12 @@
 					<view class="tips">提醒：每次下单会默认推荐该地址</view>
 				</view>
 				<view class="right">
-					<switch color=#2E8B57 @change="setDefault" />
+					<switch :checked="address.status == '1'" color="green" @change="setDefault" />
 				</view>
 			</view>
 		</view>
 		<u-picker v-model="show" mode="region" ref="uPicker" @confirm="confirm"></u-picker>
-		<u-button :custom-style="customStyle" type="warning" >提交</u-button>
+		<u-button @click="addBtn" :custom-style="customStyle" type="warning">提交</u-button>
 	</view>
 </template>
 
@@ -41,23 +40,97 @@
 		reactive,
 		ref
 	} from 'vue'
+	import { addAddressApi,editAddressApi } from '../../api/user.js'
+	import { onLoad } from '@dcloudio/uni-app';
+	const show = ref(false)
+	const finalAddress = ref('')
 	const customStyle = reactive({
 		margin: '20px', // 注意驼峰命名，并且值必须用引号包括，因为这是对象
 	})
-	const finalAddress = ref('')
-	const show = ref(false)
-
-	const setDefault = () => {}
-
-	const showRegionPicker = () => {
-		show.value = true;
+	const setDefault = (dom) => {
+		console.log(dom)
+		//设置默认地址
+		dom.detail.value ? address.status = '1' : address.status = '0'
 	}
-
+	const showRegionPicker = () => {
+		show.value = true
+	}
 	const confirm = (e) => {
 		console.log(e)
-		finalAddress.value = e.province.name + '/' + e.city.name + '/' + e.area.name
-		console.log(finalAddress.value)
+		address.area = e.province.name + '/' + e.city.name + '/' + e.area.name
+		console.log(address.area)
 	}
+	//表单绑定的数据
+	const address = reactive({
+		addressId:'',
+		openid:uni.getStorageSync('openid'),
+		userName:"",
+		phone:'',
+		area:'',
+		address:'',
+		status:'0'
+	})
+	//提交
+	const addBtn = async()=>{
+		console.log(address)
+		//表单验证
+		if(!address.userName){
+			uni.showToast({
+				icon:'none',
+				title:'请填写姓名'
+			})
+			return;
+		}
+		if(!address.phone){
+			uni.showToast({
+				icon:'none',
+				title:'请填写电话'
+			})
+			return;
+		}
+		if(!address.area){
+			uni.showToast({
+				icon:'none',
+				title:'请选择区域'
+			})
+			return;
+		}
+		if(!address.address){
+			uni.showToast({
+				icon:'none',
+				title:'请填写详细地址'
+			})
+			return;
+		}
+		let res = null;
+		if(type.value == '0'){
+			res = await addAddressApi(address)
+		}else{
+			res = await editAddressApi(address)
+		}
+		console.log(res)
+		if(res && res.code == 200){
+			//返回列表
+			uni.navigateBack()
+		}
+	}
+	//区分新增和编辑页面,新增0，编辑1
+	const type = ref('0')
+	onLoad((options)=>{
+		console.log(options)
+		//编辑设置值
+		if(options.item){
+			//设为编辑
+			type.value = '1';
+			const item = JSON.parse(options.item)
+			address.addressId = item.addressId
+			address.userName = item.userName
+			address.phone = item.phone
+			address.area = item.area
+			address.address = item.address
+			address.status = item.status
+		}
+	})
 </script>
 
 <style lang="scss" scoped>
