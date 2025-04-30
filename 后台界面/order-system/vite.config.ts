@@ -25,8 +25,14 @@ export default defineConfig({
       }
     ]
   },
+  define: {
+    'process.env': {
+      'BASE_API': "http://192.168.198.1:8089"
+      // 'BASE_API':"http://localhost:8089"
+    }
+  },
   build: {
-      
+    chunkSizeWarningLimit:1500,  
     rollupOptions: {
       output: {
         entryFileNames: `assets/[name].[hash].js`,
@@ -35,7 +41,6 @@ export default defineConfig({
        
       }
     },
-
   }
   
 })

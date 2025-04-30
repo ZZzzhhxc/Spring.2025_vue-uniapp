@@ -5,9 +5,11 @@ export type ListUserParm={
     pageSize:number;
     name:string;
     phone:string;
+    total:number;//分页的总条数
 }
 //表单的数据类型
 export type UserModel = {
+    type:string; // 区分新增或编辑
     userId:string;
     username:string;
     password:string;

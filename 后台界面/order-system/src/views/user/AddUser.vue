@@ -58,10 +58,11 @@
 import type { UserModel } from '@/api/user/UserModel';
 import SysDialog from '@/components/SysDialog.vue';
 import useDialog from '@/hooks/useDialog';
-import { reactive, ref } from 'vue';
-import type { FormInstance } from 'element-plus'
+import { nextTick, reactive, ref } from 'vue';
+import { ElMessage, type FormInstance } from 'element-plus'
 import type { Phone } from '@element-plus/icons-vue';
-import { addUserApi } from '@/api/user/index';
+import { addUserApi,editUserApi } from '@/api/user/index';
+import { EditType, Title } from '@/type/BaseType';
 //表单的ref属性
 const addFormRef = ref<FormInstance>()
 //弹框属性
@@ -75,13 +76,23 @@ const addModel = reactive<UserModel>({
     email:'',
     sex:'',
     name:'',
+    type : ''
 });
 //显示弹框
-const show =()=>{
+const show =(type:string,row?:UserModel)=>{
+    //设置弹框标题
+    type == EditType.ADD ? dialog.title = Title.ADD : dialog.title = Title.EDIT
     dialog.height = 180;
     dialog.visible = true;
+    // 回显数据
+    if(row){
+        nextTick(()=>{
+            Object.assign(addModel,row)
+        })
+    }
     //清空表单
-    addFormRef.value?.resetFields()
+    addFormRef.value?.resetFields();
+    addModel.type = type;
 };
 //给父组件调用
 defineExpose({
@@ -125,13 +136,22 @@ const rules = reactive({
     },
   ]
 });
+//注册事件
+const emists = defineEmits(['onFresh'])
 //表单提交
 const commit =()=>{
     addFormRef.value?.validate(async(valid)=>{
         if(valid){
-            let res = await addUserApi(addModel);
-            console.log(res)
+            let res = null;
+            if(addModel.type == EditType.ADD){
+                res = await addUserApi(addModel);
+            }else{
+                res = await editUserApi(addModel)
+            }
             if(res && res.code ==200){
+                ElMessage.success(res.msg)
+                //刷新列表
+                emists('onFresh')
                 onClose();
             }
         }

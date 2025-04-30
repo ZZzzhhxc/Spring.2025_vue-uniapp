@@ -6,7 +6,7 @@ export  default function useDialog(){
 const dialog = reactive({
     title:'新增',
     visible:false,
-    width:600,
+    width:800,
     height:150
 })
 //弹框关闭

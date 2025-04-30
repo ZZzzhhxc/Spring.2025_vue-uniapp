@@ -1,13 +1,16 @@
 import axios, {type AxiosInstance,type AxiosRequestConfig, type AxiosResponse, type AxiosRequestHeaders } from "axios";
 import { ElMessage } from 'element-plus';
-
 //axios请求配置
 const config = {
     //baseURL: 'http://localhost:8089',
     baseURL: '/api',
     timeout: 10000
 }
-
+export interface Result<T = any>{
+    code:number;
+    msg:string;
+    data:T
+}
 class Http {
     //axios实例
     private instance: AxiosInstance;
@@ -112,20 +115,28 @@ class Http {
     }
 
     /* GET 方法 */
-    get(url: string, params?: object): Promise<any> {
+    get<T= Result>(url: string, params?: object): Promise<T> {
         return this.instance.get(url, { params })
     }
     /* POST 方法 */
-    post(url: string, data?: object): Promise<any> {
+    post<T= Result>(url: string, data?: object): Promise<T> {
         return this.instance.post(url, data)
     }
     /* PUT 方法 */
-    put(url: string, data?: object): Promise<any> {
+    put<T= Result>(url: string, data?: object): Promise<T> {
         return this.instance.put(url, data)
     }
     /* DELETE 方法 */
-    delete(url: string): Promise<any> {
+    delete<T= Result>(url: string): Promise<T> {
         return this.instance.delete(url)
     }
+    //图片上传
+    upload<T = Result>(url: string, params?: object): Promise<T> {
+        return this.instance.post(url, params, {
+            headers: {
+            'Content-Type': 'multipart/form-data'
+            }
+    })
+}
 }
 export default new Http(config)
