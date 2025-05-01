@@ -27,36 +27,29 @@
 			评论
 		</view>
 	</view>
-	<swiper class="swiper-box" :current="swiperCurrent" @animationfinish="animationfinish">
+	<swiper :style="{height:swiperHeight+'px'}" class="swiper-box" :current="swiperCurrent" @animationfinish="animationfinish">
 		<swiper-item class="swiper-item">
 			<scroll-view scroll-y style="height: 100%;width: 100%;">
-				<view class="page-box">
+				<view id="content-wrap0" class="page-box">
 					<u-parse :html="content"></u-parse>
 				</view>
 			</scroll-view>
 		</swiper-item>
 		<swiper-item class="swiper-item">
 			<scroll-view scroll-y style="height: 100%;width: 100%;">
-				<view class="page-box">
-					我是内容二
-					我是内容二
-					我是内容二
-					我是内容二
-					我是内容二
-					我是内容二
-					我是内容二
-					我是内容二
-					我是内容二
-					我是内容二
-					我是内容二
-					我是内容二
-					我是内容二
-					我是内容二
-					我是内容二
-					我是内容二
-					我是内容二
-					我是内容二
-					我是内容二
+				<view id="content-wrap1" class="page-box">
+					<view class="comment" v-for="(res, index) in commentList" :key="res.id">
+						<view class="left"><image :src="http.baseUrl+res.avatarUrl" mode="aspectFill"></image></view>
+						<view class="right">
+							<view class="top">
+								<view class="name">{{ res.nickName }}</view>
+							</view>
+							<view class="content">{{ res.commentText }}</view>
+							<view class="bottom">
+								{{ res.createTime }}
+							</view>
+						</view>
+					</view>
 				</view>
 			</scroll-view>
 		</swiper-item>
@@ -66,6 +59,11 @@
 			<view class="item" @click="toHome">
 				<u-icon name="home" :size="40" :color="$u.color['contentColor']"></u-icon>
 				<view class="text u-line-1">首页</view>
+			</view>
+			<view class="item" @click="toCollect">
+				<u-icon v-if="hasCollect == '1'" color="#2E8B57" :size="40"  name="star"></u-icon>
+				<u-icon v-if="hasCollect == '0'"  :size="40"  name="star"></u-icon>
+				<view class="text u-line-1">收藏</view>
 			</view>
 			<view class="item car" @click="toCar">
 				<u-badge class="car-num" :count="carCount" type="error" :offset="[-3, -6]"></u-badge>
@@ -81,29 +79,31 @@
 </template>
 
 <script setup>
+	import http from '../../common/http.js'
 	import {
 		computed,
-		ref
+		ref,
+		getCurrentInstance,
+		nextTick
 	} from 'vue';
 	import {
 		onLoad
 	} from '@dcloudio/uni-app';
-	import {
-		carStore
-	} from '../../store/car.js'
+	import { carStore } from '../../store/car.js' 
+	import { commentListApi,addCollectApi,hasCollectApi,cancelCollectApi } from '../../api/order.js'
 	import {
 		orderStore
 	} from '../../store/order.js'
-	import {
-		userLogin
-	} from '../../api/user.js'
+	import {userLogin} from '../../api/user.js'
+	const instance = getCurrentInstance()
 	//获取store
 	const store = carStore()
 	const ostore = orderStore()
 	//购物车数量
-	const carCount = computed(() => {
+	const carCount = computed(()=>{
 		return store.carList.length
 	})
+	const hasCollect = ref('0')
 	//菜品详情
 	const content = ref('')
 	const current = ref(0)
@@ -127,19 +127,6 @@
 	const price = ref(0)
 	//单位
 	const goodsUnit = ref('')
-	//规格
-	const specs = ref([])
-	//规格点击事件
-	const change = (index, item) => {
-		current.value = index
-		price.value = item.goodsPrice
-		carData.value.price = item.goodsPrice
-		carData.value.specsName = item.specsName
-	}
-	//详情tab
-	const swiperCurrent = ref(0)
-	const dx = ref(0)
-	const tabIndex = ref(0)
 	//购物车的数据类型
 	const carData = ref({
 		flag: true,
@@ -151,17 +138,57 @@
 		price: '',
 		goodsImage: ''
 	})
+	//规格
+	const specs = ref([])
+	const commentList = ref()
+	//规格点击事件
+	const change = (index, item) => {
+		current.value = index
+		price.value = item.goodsPrice
+		carData.value.price = item.goodsPrice
+		carData.value.specsName = item.specsName
+	}
+	//获取评论数据
+	const getCommentList = async()=>{
+		let res = await commentListApi({
+			goodsId:carData.value.goodsId
+		})
+		console.log(res)
+		if(res && res.code == 200){
+			commentList.value = res.data
+		}
+	}
+	//详情tab
+	const swiperCurrent = ref(0)
+	const dx = ref(0)
+	const tabIndex = ref(0)
+	
+	const swiperHeight = ref(0)
+	const currentIndex = ref(0)
+	const setSwiperHeight = ()=>{
+		let element = "#content-wrap" + currentIndex.value;
+		      let query = uni.createSelectorQuery().in(instance);
+		      query.select(element).boundingClientRect();
+		      query.exec((res) => {
+				  console.log(res)
+		        if (res && res[0]) {
+		          swiperHeight.value = res[0].height;
+		        }
+		});
+	}
 	// tab栏内容切换
 	const tabClick = (index) => {
 		tabIndex.value = index;
 		swiperCurrent.value = index;
+		currentIndex.value = index;
+		setSwiperHeight()
 	}
 	//加入购物车
-	const addCar = () => {
+	const addCar = ()=>{
 		store.addCar(carData.value)
 	}
 	//立即购买
-	const addBuy = () => {
+	const addBuy = ()=>{
 		//清空
 		ostore.orderList = []
 		ostore.addOrder(carData.value)
@@ -190,6 +217,48 @@
 			url: '../car/car'
 		});
 	}
+	//收藏
+	const toCollect = async()=>{
+		if(hasCollect.value == '0'){ //未收藏
+			let res = await addCollectApi({
+				openid:uni.getStorageSync('openid'),
+				goodsId:carData.value.goodsId
+			})
+			if(res && res.code == 200){
+				hasCollectMeth()
+				uni.showToast({
+					icon:'none',
+					title:res.msg
+				})
+			}
+		}else{ //已收藏
+			let res = await cancelCollectApi({
+				openid:uni.getStorageSync('openid'),
+				goodsId:carData.value.goodsId
+			})
+			if(res && res.code == 200){
+				hasCollectMeth()
+				uni.showToast({
+					icon:'none',
+					title:res.msg
+				})
+			}
+		}
+		
+	}
+	const hasCollectMeth = async()=>{
+		let res = await hasCollectApi({
+			openid:uni.getStorageSync('openid'),
+			goodsId:carData.value.goodsId
+		})
+		console.log(res)
+		if(res.data && res.data == '1'){
+			hasCollect.value = '1'
+		}else{
+			hasCollect.value = '0'
+		}
+	}
+	
 	onLoad((options) => {
 		userLogin()
 		const goods = JSON.parse(options.goods)
@@ -207,6 +276,11 @@
 		carData.value.specsName = goods.specs[0].specsName
 		carData.value.price = goods.specs[0].goodsPrice
 		carData.value.goodsImage = goods.goodsImage.split(',')[0]
+		hasCollectMeth()
+		getCommentList()
+		nextTick(()=>{
+			setSwiperHeight()
+		})
 	})
 </script>
 
@@ -368,5 +442,81 @@
 
 	.page-box {
 		padding: 20rpx;
+	}
+	.comment {
+		display: flex;
+		padding: 30rpx;
+		.left {
+			image {
+				width: 64rpx;
+				height: 64rpx;
+				border-radius: 50%;
+				background-color: #f2f2f2;
+			}
+		}
+		.right {
+			flex: 1;
+			padding-left: 20rpx;
+			font-size: 30rpx;
+			.top {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 10rpx;
+				.name {
+					color: #5677fc;
+				}
+				.like {
+					display: flex;
+					align-items: center;
+					color: #9a9a9a;
+					font-size: 26rpx;
+					.num {
+						margin-right: 4rpx;
+						color: #9a9a9a;
+					}
+				}
+				.highlight {
+					color: #5677fc;
+					.num {
+						color: #5677fc;
+					}
+				}
+			}
+			.content {
+				margin-bottom: 10rpx;
+			}
+			.reply-box {
+				background-color: rgb(242, 242, 242);
+				border-radius: 12rpx;
+				.item {
+					padding: 20rpx;
+					border-bottom: solid 2rpx $u-border-color;
+					.username {
+						font-size: 24rpx;
+						color: #999999;
+					}
+				}
+				.all-reply {
+					padding: 20rpx;
+					display: flex;
+					color: #5677fc;
+					align-items: center;
+					.more {
+						margin-left: 6rpx;
+					}
+				}
+			}
+			.bottom {
+				margin-top: 20rpx;
+				display: flex;
+				font-size: 24rpx;
+				color: #9a9a9a;
+				.reply {
+					color: #5677fc;
+					margin-left: 10rpx;
+				}
+			}
+		}
 	}
 </style>

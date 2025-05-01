@@ -54,6 +54,9 @@
 		orderStore
 	} from '../../store/order.js'
 	import {
+		carStore
+	} from '../../store/car.js'
+	import {
 		addressStore
 	} from '../../store/address.js'
 	import {
@@ -67,11 +70,11 @@
 	} from '@dcloudio/uni-app';
 	//获取store
 	const store = orderStore()
+	const carstore = carStore()
 	const astore = addressStore()
 	const goods = computed(() => {
 		return store.orderList
 	})
-
 	//总数
 	const totalNum = computed(() => {
 		let totalNum = 0;
@@ -109,21 +112,25 @@
 		}
 	}
 	//提交订单
-	const commitBtn = async () => {
+	const commitBtn = async()=>{
 		let commitParm = reactive({
-			openid: uni.getStorageSync('openid'),
-			userName: astore.userName,
-			phone: astore.phone,
-			address: astore.area + "," + astore.address,
-			price: totalPrice.value,
-			details: store.orderList
+			openid:uni.getStorageSync('openid'),
+			userName:astore.userName,
+			phone:astore.phone,
+			address:astore.area + ","+ astore.address,
+			price:totalPrice.value,
+			details:store.orderList
 		})
 		const res = await splaceOrderApi(commitParm)
 		console.log(res)
-		if (res && res.code == 200) {
+		if(res && res.code == 200){
 			//清空购物车
 			store.orderList = []
+			carstore.carList = []
 			uni.navigateBack()
+			uni.navigateTo({
+			    url: '../order/order'
+			});
 		}
 	}
 	onLoad(() => {

@@ -9,6 +9,8 @@ import com.itmk.web.goods_specs.entity.SysGoodsSpecs;
 import com.itmk.web.goods_specs.service.SysGoodsSpecsService;
 import com.itmk.web.sys_banner.entity.SysBanner;
 import com.itmk.web.sys_banner.service.SysBannerService;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +34,21 @@ public class HomeController {
         QueryWrapper<SysBanner> query = new QueryWrapper<>();
         query.lambda().eq(SysBanner::getStatus,"1");
         List<SysBanner> list = sysBannerService.list(query);
+        if(list.size() > 0){
+            for (int i=0;i<list.size();i++){
+                if(StringUtils.isNotEmpty(list.get(i).getGoodsId().toString())){
+                    //查询商品
+                    SysGoods goods = sysGoodsService.getById(list.get(i).getGoodsId());
+                    list.get(i).setSysGoods(goods);
+                    //查询价格
+                    QueryWrapper<SysGoodsSpecs> queryWrapper = new QueryWrapper<>();
+                    queryWrapper.lambda().eq(SysGoodsSpecs::getGoodsId,list.get(i).getGoodsId())
+                            .orderByAsc(SysGoodsSpecs::getOrderNum);
+                    List<SysGoodsSpecs> specs = sysGoodsSpecsService.list(queryWrapper);
+                    list.get(i).getSysGoods().setSpecs(specs);
+                }
+            }
+        }
         return ResultUtils.success("查询成功",list);
     }
 

@@ -17,7 +17,7 @@
 										<view class="store">{{ res.userName }}</view>
 										<u-icon name="arrow-right" color="rgb(203,203,203)" :size="26"></u-icon>
 									</view>
-									<view style="margin-left: 6px;"  class="right">{{ res.phone }}</view>
+									<view style="margin-left: 6px;;" class="right">{{ res.phone }}</view>
 								</view>
 								<view class="">
 									{{res.address}}
@@ -48,7 +48,8 @@
 								</view>
 								<view class="bottom">
 									<view @click="cancel(res,index)" v-if="res.status == '0'" class="exchange btn">取消订单</view>
-									<view v-if="res.status == '2'" class="evaluate btn">评价</view>
+									<view @click="confirmOrderBtn(res,index)" v-if="res.status == '1'" class="evaluate btn">确定收货</view>
+									<view @click="commentBtn(res)" v-if="res.status == '2'" class="evaluate btn">评价</view>
 								</view>
 							</view>
 							<u-loadmore :status="loadStatus[index]" bgColor="#f2f2f2"></u-loadmore>
@@ -57,6 +58,11 @@
 				</swiper-item>
 			</swiper>
 		</view>
+		<u-modal confirm-color="#2E8B57" :content-style="{padding: '10px'}"  :show-cancel-button='true' title="评论" :zoom="false" v-model="show" @confirm='confirmBtn' @cancel="cancelBtn">
+		    <view style="height: 100px;">
+		        <textarea v-model="commentText" placeholder="请输入评论" auto-height />
+		    </view>
+		</u-modal>
 	</view>
 </template>
 
@@ -64,11 +70,21 @@
 	import {
 		onReady
 	} from '@dcloudio/uni-app';
-	import {getOrderListApi,cancelOrderApi} from '../../api/order.js'
+	import {getOrderListApi,cancelOrderApi,confirmOrderApi} from '../../api/order.js'
+	import {addCommentApi} from '../../api/user.js'
 	import {
 		ref,
 		computed
 	} from 'vue'
+	//评论弹框显示
+	const show = ref(false)
+	const orderId = ref('')
+	const commentText = ref('')
+	//评价点击事件
+	const commentBtn = (item)=>{
+		orderId.value = item.orderId;
+	    show.value = true
+	}
 	const tabs = ref(null);
 	const orderList = ref([
 		[],
@@ -154,7 +170,12 @@
 			res.data.records.map(item =>{
 				orderList.value[idx].push(item)
 			})
-			loadStatus.value.splice(currents.value,1,'loadmore')
+			if(res.data.total == pages.value){
+				loadStatus.value.splice(currents.value,1,'nomore')
+			}else{
+				loadStatus.value.splice(currents.value,1,'loadmore')
+			}
+			
 		}else{
 			loadStatus.value.splice(currents.value,1,'nomore')
 		}
@@ -164,7 +185,7 @@
 	    uni.showModal({
 	        title: '提示',
 	        content: '确定取消订单吗？',
-	        success:async function(res) {
+	        success: async function(res) {
 	            if (res.confirm) {
 	                console.log('用户点击确定');
 					console.log(item)
@@ -172,8 +193,8 @@
 						orderId:item.orderId
 					})
 					if(res && res.code == 200){
-						getOrderList(index+1);
 						change(index+1)
+						getOrderList(index+1);
 					}
 	            } else if (res.cancel) {
 	                console.log('用户点击取消');
@@ -181,10 +202,58 @@
 	        }
 	    });
 	}
+	const confirmOrderBtn = (item,index)=>{
+		console.log(index)
+		uni.showModal({
+		    title: '提示',
+		    content: '确定收货吗？',
+		    success: async function(res) {
+		        if (res.confirm) {
+		            console.log('用户点击确定收货');
+					console.log(item)
+					let res = await confirmOrderApi({
+						orderId:item.orderId
+					})
+					if(res && res.code == 200){
+						change(swiperCurrent.value)
+						getOrderList(swiperCurrent.value);
+					}
+		        } else if (res.cancel) {
+		            console.log('用户点击取消');
+		        }
+		    }
+		});
+	}
+	//评论提交
+	const confirmBtn = async()=>{
+	    console.log('确定')
+		if(!commentText.value){
+			uni.showToast({
+				icon:'none',
+				title:'请填写评论'
+			})
+			return;
+		}
+		let res= await addCommentApi({
+			orderId:orderId.value,
+			openid:uni.getStorageSync('openid'),
+			commentText:commentText.value
+		})
+		if(res && res.code == 200){
+			show.value = false
+		}
+	    
+	}
+	//评论取消
+	const cancelBtn = ()=>{
+	    console.log('取消')
+	    show.value = false
+	}
 	onReady(() => {
 		getOrderList(0);
 	})
 </script>
+
 <style>
 /* #ifndef H5 */
 page {
@@ -225,8 +294,8 @@ page {
 		.left {
 			margin-right: 20rpx;
 			image {
-				width: 160rpx;
-				height: 160rpx;
+				width: 140rpx;
+				height: 140rpx;
 				border-radius: 10rpx;
 			}
 		}
@@ -241,7 +310,7 @@ page {
 				color: $u-tips-color;
 			}
 			.delivery-time {
-				color: #75e553;
+				color: #2E8B57;
 				font-size: 24rpx;
 			}
 		}
@@ -310,7 +379,7 @@ page {
 		line-height: 64rpx;
 		color: #ffffff;
 		font-size: 26rpx;
-		background: linear-gradient(270deg, rgba(249, 242, 186, 1.0) 0%, rgba(46, 139, 87, 1.0) 100%);
+		background: linear-gradient(270deg, rgba(240, 249, 194, 1.0) 0%, rgba(46, 139, 87, 1.0) 100%);
 	}
 }
 .wrap {

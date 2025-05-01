@@ -1,5 +1,7 @@
 import { createApp } from 'vue'
 //import './style.css'
+//echarts
+import * as echarts from 'echarts'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import router from './router'
@@ -19,3 +21,4 @@ app.use(router).use(ElementPlus, {
 //     app.component(key, component)
 //   }
 app.config.globalProperties.$myconfirm = myConfirm
+app.config.globalProperties.$echarts = echarts;

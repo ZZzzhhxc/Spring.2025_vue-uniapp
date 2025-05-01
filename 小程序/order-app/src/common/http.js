@@ -1,5 +1,5 @@
 // const baseUrl = 'http://localhost:8099'
-const baseUrl = 'http://192.168.198.1:8089'  
+const baseUrl = 'http://192.168.198.1:8089'   
 const http = (options = {}) => {
     return new Promise((resolve, reject) => {
         uni.request({
@@ -33,8 +33,31 @@ const put = (url, data, options = {}) => {
     options.url = url;
     return http(options)
 }
+const upload = (parm) => {
+	return new Promise((resolve, reject) => {
+		uni.uploadFile({
+			url: baseUrl + parm.url,
+			filePath: parm.filePath,
+			name: 'file',
+			formData: {
+				openid: uni.getStorageSync('openid')
+			},
+			header: {
+				// Authorization: uni.getStorageSync("token")
+			},
+			success: (res) => {
+				resolve(res.data);
+			},
+			fail: (error) => {
+				reject(error)
+			}
+		})
+	})
+}
 export default {
     get,
     post,
-    put
+    put,
+	upload,
+	baseUrl
 }

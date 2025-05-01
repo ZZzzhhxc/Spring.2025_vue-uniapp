@@ -58,6 +58,13 @@
 			{
 				"navigationBarTitleText" : "我的订单"
 			}
+		},
+		{
+			"path" : "pages/collect/collect",
+			"style" : 
+			{
+				"navigationBarTitleText" : ""
+			}
 		}
 	],
 	"globalStyle": {

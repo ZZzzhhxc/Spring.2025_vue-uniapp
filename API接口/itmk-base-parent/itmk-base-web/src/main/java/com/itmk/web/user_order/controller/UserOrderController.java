@@ -5,13 +5,12 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.itmk.utils.ResultUtils;
 import com.itmk.utils.ResultVo;
-import com.itmk.web.user_order.entity.OrderParm;
-import com.itmk.web.user_order.entity.SendParm;
-import com.itmk.web.user_order.entity.UserOrder;
-import com.itmk.web.user_order.entity.WxOrderParm;
+import com.itmk.web.user_order.entity.*;
 import com.itmk.web.user_order.service.UserOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/wxapi/order")
@@ -20,9 +19,9 @@ public class UserOrderController {
     private UserOrderService userOrderService;
 
     //下单
-    @PostMapping("/placeOrder")
-    public ResultVo placeOrder(@RequestBody OrderParm parm){
-        userOrderService.placeOrder(parm);
+    @PostMapping("/splaceOrder")
+    public ResultVo splaceOrder(@RequestBody OrderParm parm){
+        userOrderService.splaceOrder(parm);
         return ResultUtils.success("提交成功!");
     }
 
@@ -32,12 +31,14 @@ public class UserOrderController {
         IPage<UserOrder> orderList = userOrderService.getOrderList(parm);
         return ResultUtils.success("查询成功!",orderList);
     }
-    //pc端查询订单
+
+    //查询pc订单
     @GetMapping("/getPcOrderList")
     public ResultVo getPcOrderList(WxOrderParm parm){
         IPage<UserOrder> orderList = userOrderService.getPcOrderList(parm);
         return ResultUtils.success("查询成功!",orderList);
     }
+
     //发货
     @PutMapping("/sendOrder")
     public ResultVo sendOrder(@RequestBody SendParm parm){
@@ -75,5 +76,40 @@ public class UserOrderController {
             return ResultUtils.success("取消成功!");
         }
         return ResultUtils.error("取消失败!");
+    }
+    //确定收货
+    @PostMapping("/confirmOrder")
+    public ResultVo confirmOrder(@RequestBody SendParm parm){
+        //更新条件
+        LambdaUpdateWrapper<UserOrder> query = new LambdaUpdateWrapper<>();
+        query.eq(UserOrder::getOrderId,parm.getOrderId())
+                .set(UserOrder::getStatus,"2");
+        if(userOrderService.update(query)){
+            return ResultUtils.success("收货成功!");
+        }
+        return ResultUtils.error("收货失败!");
+    }
+    //首页统计 0:日 1：月 2：年
+    @GetMapping("/getTotal")
+    public ResultVo getTotal(String type){
+        List<SunList> list = null;
+        switch (type){
+            case "1":
+                list = userOrderService.getMonths();
+                break;
+            case "2":
+                list = userOrderService.getYears();
+                break;
+            default:
+                list = userOrderService.getDays();
+        }
+        Echarts echarts = new Echarts();
+        if(list!= null && list.size() >0){
+            for (int i=0;i<list.size();i++){
+                echarts.getNames().add(list.get(i).getDays());
+                echarts.getValues().add(list.get(i).getPrice());
+            }
+        }
+        return ResultUtils.success("查询成功",echarts);
     }
 }

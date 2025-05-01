@@ -8,3 +8,18 @@ export const getOrderListApi = (parm)=>{
 export const cancelOrderApi = (parm)=>{
 	return http.post("/wxapi/order/cancelOrder",parm)
 }
+export const commentListApi = (parm)=>{
+	return http.get("/wxapi/comment/commentList",parm)
+}
+export const addCollectApi = (parm)=>{
+	return http.post("/wxapi/collect/addCollect",parm)
+}
+export const hasCollectApi = (parm)=>{
+	return http.get("/wxapi/collect/hasCollect",parm)
+}
+export const cancelCollectApi = (parm)=>{
+	return http.post("/wxapi/collect/cancelCollect",parm)
+}
+export const confirmOrderApi = (parm)=>{
+	return http.post("/wxapi/order/confirmOrder",parm)
+}
